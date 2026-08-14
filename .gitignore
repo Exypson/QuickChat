@@ -1,0 +1,6 @@
+# Build folders
+bin/
+obj/
+
+# Mod Release folder
+Thunderstore_Release/

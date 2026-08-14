@@ -1,0 +1,30 @@
+<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <Title>QuickChat</Title>
+        <Authors>Exypson</Authors>
+        <Product>QuickChat</Product>
+        <AssemblyName>QuickChat</AssemblyName>
+        <Description>This mod introduces a quality of life communication feature for R.E.P.O by adding a quick chat wheel.</Description>
+        <RootNamespace>QuickChat</RootNamespace>
+
+        <TargetFramework>netstandard2.1</TargetFramework>
+        <LangVersion>latest</LangVersion>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <Nullable>enable</Nullable>
+
+        <RestoreAdditionalProjectSources>https://nuget.bepinex.dev/v3/index.json</RestoreAdditionalProjectSources>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <!-- BepInEx Core and Analyzers -->
+        <PackageReference Include="BepInEx.Analyzers" Version="1.*" PrivateAssets="all" />
+        <PackageReference Include="BepInEx.Core" Version="5.*" />
+        <PackageReference Include="BepInEx.AssemblyPublicizer.MSBuild" Version="0.4.1" PrivateAssets="all" ExcludeAssets="runtime" />
+
+        <!-- Unity Modules -->
+        <PackageReference Include="UnityEngine.Modules" Version="2022.3.62" IncludeAssets="compile" />
+
+        <!-- R.E.P.O Game Libraries (publicized) -->
+        <PackageReference Include="R.E.P.O.GameLibs.Steam" Version="*-*" PrivateAssets="all" Publicize="true" />
+    </ItemGroup>
+</Project>
