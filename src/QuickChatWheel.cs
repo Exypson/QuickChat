@@ -8,9 +8,7 @@ namespace QuickChat
         private bool isWheelActive = false;
         private int selectedIndex = -1; 
         
-        private readonly float deadzoneRadius = 30f;
         private MethodInfo chatResetMethod;
-        private readonly float wheelRadius = 150f;
         
         private Texture2D bgTexture;
         private Texture2D highlightTexture;
@@ -35,10 +33,8 @@ namespace QuickChat
             bgTexture = new Texture2D(diameter, diameter, TextureFormat.ARGB32, false);
             highlightTexture = new Texture2D(diameter, diameter, TextureFormat.ARGB32, false);
 
-            // Dark, highly transparent gradient
-            Color centerBg = new Color(0f, 0f, 0f, 0.1f);
-            Color edgeBg = new Color(0f, 0f, 0f, 0.7f);
-            Color lineColor = new Color(0f, 0f, 0f, 0.9f);
+            Color clear = Color.clear;
+            Color uiColor = new Color(1f, 1f, 1f, 0.8f);
 
             for (int y = 0; y < diameter; y++)
             {
@@ -53,63 +49,46 @@ namespace QuickChat
                         float angle = Mathf.Atan2(dx, dy) * Mathf.Rad2Deg;
                         if (angle < 0) angle += 360f;
 
-                        // Outer border
-                        if (dist > texRadius - 3f) 
-                        {
-                            bgTexture.SetPixel(x, y, lineColor);
-                        }
-                        else if (dist < 35f) 
-                        {
-                            if (dist > 32f) bgTexture.SetPixel(x, y, lineColor);
-                            else bgTexture.SetPixel(x, y, Color.clear);
-                        }
-                        else
-                        {
-                            // Background gradient
-                            float t = dist / texRadius;
-                            Color bgColor = Color.Lerp(centerBg, edgeBg, t);
+                        bool drawPixel = false;
 
-                            // Slice dividers (every 60 degrees starting at 30)
-                            float modAngle = (angle - 30f) % 60f;
-                            if (modAngle < 0) modAngle += 60f;
-                            
-                            // Calculate distance to the nearest divider line
-                            float deltaAngle = Mathf.Min(modAngle, 60f - modAngle);
-                            float arcLength = (deltaAngle * Mathf.Deg2Rad) * dist;
+                        if (dist > 35f && dist < 40f) drawPixel = true; 
+                        if (dist > 44f && dist < 46f) drawPixel = true; 
 
-                            if (arcLength < 1.5f)
-                            {
-                                bgTexture.SetPixel(x, y, lineColor);
-                            }
-                            else
-                            {
-                                bgTexture.SetPixel(x, y, bgColor);
-                            }
+                        float modAngle = (angle - 22.5f) % 45f;
+                        if (modAngle < 0) modAngle += 45f;
+                        float deltaAngle = Mathf.Min(modAngle, 45f - modAngle);
+                        float arcLength = (deltaAngle * Mathf.Deg2Rad) * dist;
+
+                        if (dist > 50f && arcLength < 1.0f) 
+                        {
+                            drawPixel = true;
                         }
+
+                        if (drawPixel) bgTexture.SetPixel(x, y, uiColor);
+                        else bgTexture.SetPixel(x, y, clear);
 
                         float highlightAngle = angle;
                         if (highlightAngle > 180f) highlightAngle -= 360f;
                         
-                        float modForHighlight = (angle - 30f) % 60f;
-                        if (modForHighlight < 0) modForHighlight += 60f;
-                        float hlDeltaAngle = Mathf.Min(modForHighlight, 60f - modForHighlight);
+                        float modForHighlight = (angle - 22.5f) % 45f;
+                        if (modForHighlight < 0) modForHighlight += 45f;
+                        float hlDeltaAngle = Mathf.Min(modForHighlight, 45f - modForHighlight);
                         float hlArcLength = (hlDeltaAngle * Mathf.Deg2Rad) * dist;
 
-                        if (dist < texRadius - 3f && dist > 35f && highlightAngle > -30f && highlightAngle < 30f && hlArcLength >= 1.5f)
+                        if (dist < texRadius - 3f && dist > 50f && highlightAngle > -22.5f && highlightAngle < 22.5f && hlArcLength >= 1.0f)
                         {
-                            // Soft radial fade
                             float glowAlpha = 0.25f * (1f - (dist / texRadius));
                             highlightTexture.SetPixel(x, y, new Color(1f, 1f, 1f, glowAlpha));
                         }
                         else
                         {
-                            highlightTexture.SetPixel(x, y, Color.clear);
+                            highlightTexture.SetPixel(x, y, clear);
                         }
                     }
                     else
                     {
-                        bgTexture.SetPixel(x, y, Color.clear);
-                        highlightTexture.SetPixel(x, y, Color.clear);
+                        bgTexture.SetPixel(x, y, clear);
+                        highlightTexture.SetPixel(x, y, clear);
                     }
                 }
             }
@@ -187,7 +166,7 @@ namespace QuickChat
                 angle += 90f;
                 if (angle < 0) angle += 360f;
 
-                selectedIndex = Mathf.FloorToInt((angle + 30f) / 60f) % 6;
+                selectedIndex = Mathf.FloorToInt((angle + 22.5f) / 45f) % 8;
             }
 
             DrawWheel(center);
@@ -205,9 +184,7 @@ namespace QuickChat
             if (selectedIndex != -1 && highlightTexture != null)
             {
                 Matrix4x4 oldMatrix = GUI.matrix;
-                
-                float drawAngle = selectedIndex * 60f;
-                
+                float drawAngle = selectedIndex * 45f;
                 GUIUtility.RotateAroundPivot(drawAngle, center);
                 GUI.DrawTexture(bgRect, highlightTexture);
                 GUI.matrix = oldMatrix;
@@ -217,9 +194,11 @@ namespace QuickChat
             {
                 QuickChatPlugin.ConfigTop.Value,
                 QuickChatPlugin.ConfigTopRight.Value,
+                QuickChatPlugin.ConfigRight.Value,
                 QuickChatPlugin.ConfigBottomRight.Value,
                 QuickChatPlugin.ConfigBottom.Value,
                 QuickChatPlugin.ConfigBottomLeft.Value,
+                QuickChatPlugin.ConfigLeft.Value,
                 QuickChatPlugin.ConfigTopLeft.Value
             };
 
@@ -227,31 +206,28 @@ namespace QuickChat
             textStyle.alignment = TextAnchor.MiddleCenter;
             textStyle.fontStyle = FontStyle.Bold;
             textStyle.fontSize = 17;
-            textStyle.normal.textColor = new Color(0.85f, 0.85f, 0.85f, 1f);
+            textStyle.normal.textColor = new Color(0.9f, 0.9f, 0.9f, 1f);
 
             GUIStyle selectedStyle = new GUIStyle(textStyle);
             selectedStyle.normal.textColor = Color.white;
             selectedStyle.fontSize = 19; 
 
-            float boxWidth = 200f;
-            float boxHeight = 50f;
-
-            for (int i = 0; i < 6; i++)
+            for (int i = 0; i < 8; i++)
             {
-                float drawAngle = -90f + (i * 60f);
+                float drawAngle = -90f + (i * 45f);
                 float rad = drawAngle * Mathf.Deg2Rad;
 
-                float x = center.x + Mathf.Cos(rad) * textRadius - (boxWidth / 2f);
-                float y = center.y + Mathf.Sin(rad) * textRadius - (boxHeight / 2f);
+                bool isSelected = (i == selectedIndex);
+                GUIStyle styleToUse = isSelected ? selectedStyle : textStyle;
 
-                Rect rect = new Rect(x, y, boxWidth, boxHeight);
-                GUIStyle styleToUse = (i == selectedIndex) ? selectedStyle : textStyle;
+                Vector2 textSize = styleToUse.CalcSize(new GUIContent(options[i]));
+                float boxW = textSize.x + 20f;
+                float boxH = textSize.y + 10f;
 
-                Rect shadowRect = new Rect(rect.x + 2, rect.y + 2, rect.width, rect.height);
-                GUIStyle shadowStyle = new GUIStyle(styleToUse);
-                shadowStyle.normal.textColor = new Color(0f, 0f, 0f, 0.9f);
-                GUI.Label(shadowRect, options[i], shadowStyle);
+                float x = center.x + Mathf.Cos(rad) * textRadius - (boxW / 2f);
+                float y = center.y + Mathf.Sin(rad) * textRadius - (boxH / 2f);
 
+                Rect rect = new Rect(x, y, boxW, boxH);
                 GUI.Label(rect, options[i], styleToUse);
             }
         }
@@ -263,10 +239,12 @@ namespace QuickChat
             {
                 case 0: message = QuickChatPlugin.ConfigTop.Value; break;
                 case 1: message = QuickChatPlugin.ConfigTopRight.Value; break;
-                case 2: message = QuickChatPlugin.ConfigBottomRight.Value; break;
-                case 3: message = QuickChatPlugin.ConfigBottom.Value; break;
-                case 4: message = QuickChatPlugin.ConfigBottomLeft.Value; break;
-                case 5: message = QuickChatPlugin.ConfigTopLeft.Value; break;
+                case 2: message = QuickChatPlugin.ConfigRight.Value; break;
+                case 3: message = QuickChatPlugin.ConfigBottomRight.Value; break;
+                case 4: message = QuickChatPlugin.ConfigBottom.Value; break;
+                case 5: message = QuickChatPlugin.ConfigBottomLeft.Value; break;
+                case 6: message = QuickChatPlugin.ConfigLeft.Value; break;
+                case 7: message = QuickChatPlugin.ConfigTopLeft.Value; break;
             }
 
             if (string.IsNullOrEmpty(message)) return;
