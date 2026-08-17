@@ -11,6 +11,8 @@ And thus, I bring you guys: **QuickChat**. Instead of slowly typing your life aw
 * **Eight Essential Comms:** The default wheel comes equipped with the essentials: *Yes, No, Help, Hide, Follow me, Thanks, Run,* and *Stop*.
 * **Full Customizability:** Don't like the defaults? You can easily create your own custom chat options in the wheel. Full in-game customization available. 
 
+Preview available here: https://thunderstore.io/c/repo/p/Exypson/QuickChat/
+
 ## Support the Developer:
 QuickChat is completely free and open-source. If the mod helped you and you'd like to support its continued development, any donations are massively appreciated!
 
